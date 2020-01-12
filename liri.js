@@ -1,6 +1,6 @@
 // dot env configuration
-require("dotenv").config();
-
+const dotEnv = require("dotenv").config();
+const axios = require("axios");
 const keys = require("./keys");
 // * You should then be able to access your keys information like so
 //   var spotify = new Spotify(keys.spotify);
@@ -8,36 +8,53 @@ const keys = require("./keys");
 // initialize command line usage
 const [_, __, action, parameter] = process.argv;
 
-function ifConcertThis() {
-  if (action === "concert-this") {
-    let concert;
-    console.log("hello my brother on stage!");
-    if (parameter.split(" ")[1]) {
-      concert = paramter.split(" ").join();
-      console.log("hello there sexy!");
-    } else {
-    }
+switch (action) {
+  case "concert-this":
+    ifConcertThis(parameter);
+    break;
 
-    // call API
-    axios
-      .get(
-        `https://rest.bandsintown.com/artists/${parameter}/events?app_id=codingbootcamp`
-      )
-      .then(function(res) {
-        console.log(res.data);
-      });
-  }
-  return;
+  case "spotify-this-song":
+    ifSpotify();
+    break;
+
+  case "movie-this":
+    ifMovie();
+    break;
+
+  case "do-what-it-says":
+    ifDoWhatItSays();
+    break;
 }
-ifConcertThis();
-if (action === "spotify-this-song") {
+
+function ifConcertThis(parameter) {
+  console.log(parameter);
+  // console.log("hello my brother on stage!");
+  if (parameter.split(" ")[1]) {
+    concert = parameter.split(" ").join("");
+    bandInTownAPI(concert);
+  } else {
+    bandInTownAPI(parameter);
+  }
+}
+
+function bandInTownAPI(band) {
+  axios
+    .get(
+      `https://rest.bandsintown.com/artists/${parameter}/events?app_id=codingbootcamp`
+    )
+    .then(function(res) {
+      console.log(res.data);
+    });
+}
+
+function ifSpotify() {
   console.log("hello from spotify!");
 }
 
-if (action === "movie-this") {
+function ifMovie() {
   console.log("hello from omdb!");
 }
 
-if (action === "do-what-it-says") {
+function ifDoWhatItSays() {
   console.log("I'm all yours");
 }
