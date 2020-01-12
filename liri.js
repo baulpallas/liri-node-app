@@ -2,6 +2,8 @@
 const dotEnv = require("dotenv").config();
 const axios = require("axios");
 const keys = require("./keys");
+const moment = require("moment");
+moment().format();
 // const spotify = new Spotify(keys.spotify);
 
 // initialize command line usage
@@ -13,20 +15,19 @@ switch (action) {
     break;
 
   case "spotify-this-song":
-    ifSpotify();
+    ifSpotify(parameter);
     break;
 
   case "movie-this":
-    ifMovie();
+    ifMovie(parameter);
     break;
 
   case "do-what-it-says":
     ifDoWhatItSays();
     break;
 }
-
+// concert-this functionality
 function ifConcertThis(parameter) {
-  // console.log("hello my brother on stage!");
   if (parameter.split(" ")[1]) {
     concert = parameter.split(" ").join("");
     bandInTownAPI(concert);
@@ -34,17 +35,21 @@ function ifConcertThis(parameter) {
     bandInTownAPI(parameter);
   }
 }
-
+// concert-this API Call
 function bandInTownAPI(parameter) {
   axios
     .get(
       `https://rest.bandsintown.com/artists/${parameter}/events?app_id=codingbootcamp`
     )
     .then(function(res) {
-      // let APIResponse = res.data;
+      // console.log(res.data);
       for (let i = 0; i < 5; i++) {
+        let unparsedDate = res.data[i].datetime;
+        let parsedDate = unparsedDate.substring(0, unparsedDate.length - 9);
+        let date = moment(parsedDate, "YYYY-MM-DD").format("MM/DD/YYYY");
         console.log(
-          `Venue: ${res.data[i].venue.name}` +
+          `Date: ${date}` +
+            `\nVenue: ${res.data[i].venue.name}` +
             `\nCity: ${res.data[i].venue.city}` +
             `\nCountry: ${res.data[i].venue.country}\n`
         );
@@ -52,14 +57,74 @@ function bandInTownAPI(parameter) {
     });
 }
 
-function ifSpotify() {
+function ifSpotify(parameter) {
+  spotifyAPI(parameter);
   console.log("hello from spotify!");
 }
 
-function ifMovie() {
-  console.log("hello from omdb!");
+function spotifyAPI(parameter) {
+  axios
+    .get(
+      `https://accounts.spotify.com/authorize?client_id=${process.env.SPOTIFY_ID}&response_type=code&redirect_uri=https%3A%2F%2Fexample.com%2Fcallback&scope=user-read-private%20user-read-email&state=34fFs29kd0`
+    )
+    .then(function(res) {
+      console.log(res.data);
+    });
+}
+
+function ifMovie(parameter) {
+  let movie;
+  try {
+    if (parameter.split(" ")[1]) {
+      movie = parameter.split(" ").join("+");
+      console.log(movie);
+      OMDBAPI(movie);
+    } else {
+      OMDBAPI(parameter);
+    }
+  } catch (err) {
+    movie = "Mr.+Nobody";
+    OMDBAPI(movie);
+  }
+}
+
+function OMDBAPI(movie) {
+  axios
+    .get(`http://www.omdbapi.com/?t=${movie}&y=&plot=short&apikey=trilogy`)
+    .then(function(res) {
+      console.log(
+        `Title: ${res.data.Title}` +
+          `\nRelease Year: ${res.data.Year}` +
+          `\nIMDB Rating: ${res.data.imdbRating}` +
+          `\nRotten Tomatoes Rating: ${res.data.Ratings[1].Value}` +
+          `\nCountry of Production: ${res.data.Country}` +
+          `\nPlot: ${res.data.Plot}` +
+          `\nActors: ${res.data.Actors}`
+      );
+      // console.log(res.data);
+    })
+    .catch(function(error) {
+      if (error.res) {
+        console.log("---------------Data---------------");
+        console.log(error.res.data);
+        console.log("---------------Status---------------");
+        console.log(error.res.status);
+        console.log("---------------Status---------------");
+        console.log(error.res.headers);
+      }
+      console.log("hello from omdb!");
+    });
 }
 
 function ifDoWhatItSays() {
   console.log("I'm all yours");
 }
+
+// * Title of the movie.
+// * Year the movie came out.
+// * IMDB Rating of the movie.
+// * Rotten Tomatoes Rating of the movie.
+// * Country where the movie was produced.
+// * Language of the movie.
+// * Plot of the movie.
+// * Actors in the movie.
