@@ -3,12 +3,15 @@ const dotEnv = require("dotenv").config();
 const axios = require("axios");
 const keys = require("./keys");
 const moment = require("moment");
+const fs = require("fs");
+
 moment().format();
 // const spotify = new Spotify(keys.spotify);
 
 // initialize command line usage
 const [_, __, action, parameter] = process.argv;
 
+///switch cases
 switch (action) {
   case "concert-this":
     ifConcertThis(parameter);
@@ -26,13 +29,19 @@ switch (action) {
     ifDoWhatItSays();
     break;
 }
+
+// =================================
 // concert-this functionality
 function ifConcertThis(parameter) {
-  if (parameter.split(" ")[1]) {
-    concert = parameter.split(" ").join("");
-    bandInTownAPI(concert);
-  } else {
-    bandInTownAPI(parameter);
+  try {
+    if (parameter.split(" ")[1]) {
+      concert = parameter.split(" ").join("");
+      bandInTownAPI(concert);
+    } else {
+      bandInTownAPI(parameter);
+    }
+  } catch (err) {
+    console.log("Invalid entry!");
   }
 }
 // concert-this API Call
@@ -57,6 +66,7 @@ function bandInTownAPI(parameter) {
     });
 }
 
+// =================================
 function ifSpotify(parameter) {
   spotifyAPI(parameter);
   console.log("hello from spotify!");
@@ -72,6 +82,7 @@ function spotifyAPI(parameter) {
     });
 }
 
+// =================================
 function ifMovie(parameter) {
   let movie;
   try {
@@ -98,6 +109,7 @@ function OMDBAPI(movie) {
           `\nIMDB Rating: ${res.data.imdbRating}` +
           `\nRotten Tomatoes Rating: ${res.data.Ratings[1].Value}` +
           `\nCountry of Production: ${res.data.Country}` +
+          `\nLanguage: ${res.data.Language}` +
           `\nPlot: ${res.data.Plot}` +
           `\nActors: ${res.data.Actors}`
       );
@@ -116,15 +128,34 @@ function OMDBAPI(movie) {
     });
 }
 
+// =================================
 function ifDoWhatItSays() {
-  console.log("I'm all yours");
-}
+  fs.readFile("random.txt", "utf8", function(err, data) {
+    let txtData;
+    let action;
+    let userInput;
+    if (err) {
+      return console.log(err);
+    }
+    txtData = data.split(", ");
+    action = txtData[0];
+    console.log(action);
+    userInput = txtData[1];
+    console.log(userInput);
 
-// * Title of the movie.
-// * Year the movie came out.
-// * IMDB Rating of the movie.
-// * Rotten Tomatoes Rating of the movie.
-// * Country where the movie was produced.
-// * Language of the movie.
-// * Plot of the movie.
-// * Actors in the movie.
+    // swtich case for final function
+    switch (action) {
+      case "concert-this":
+        ifConcertThis(userInput);
+        break;
+
+      case "spotify-this-song":
+        ifSpotify(userInput);
+        break;
+
+      case "movie-this":
+        ifMovie(userInput);
+        break;
+    }
+  });
+}
