@@ -4,9 +4,13 @@ const axios = require("axios");
 const keys = require("./keys");
 const moment = require("moment");
 const fs = require("fs");
+const Spotify = require(`node-spotify-api`);
+let spotify = new Spotify({
+  id: process.env.SPOTIFY_ID,
+  secret: process.env.SPOTIFY_SECRET
+});
 
 moment().format();
-// const spotify = new Spotify(keys.spotify);
 
 // initialize command line usage
 const [_, __, action, parameter] = process.argv;
@@ -72,14 +76,32 @@ function ifSpotify(parameter) {
   console.log("hello from spotify!");
 }
 
-function spotifyAPI(parameter) {
-  axios
-    .get(
-      `https://accounts.spotify.com/authorize?client_id=${process.env.SPOTIFY_ID}&response_type=code&redirect_uri=https%3A%2F%2Fexample.com%2Fcallback&scope=user-read-private%20user-read-email&state=34fFs29kd0`
-    )
+function spotifyAPI(song) {
+  spotify
+    .search({ type: `track`, query: song, limit: 5 })
     .then(function(res) {
-      console.log(res.data);
+      for (let i = 0; i < 3; i++) {
+        let artist = res.tracks.items[i].album.artists[0].name;
+        let trackName = res.tracks.items[i].name;
+        let trackURL = res.tracks.items[i].album.external_urls.spotify;
+        console.log(
+          `Artist: ${artist}` +
+            `\nTrack: ${trackName}` +
+            `\nTrack URL: ${trackURL}\n`
+        );
+      }
+    })
+    .catch(function(err) {
+      console.log(err);
     });
+
+  // axios
+  //   .get(
+  //     `https://accounts.spotify.com/authorize?client_id=${process.env.SPOTIFY_ID}&response_type=code&redirect_uri=https%3A%2F%2Fexample.com%2Fcallback&scope=user-read-private%20user-read-email&state=34fFs29kd0`
+  //   )
+  //   .then(function(res) {
+  //     console.log(res.data);
+  //   });
 }
 
 // =================================
@@ -139,9 +161,9 @@ function ifDoWhatItSays() {
     }
     txtData = data.split(", ");
     action = txtData[0];
-    console.log(action);
+    console.log(action + "action");
     userInput = txtData[1];
-    console.log(userInput);
+    console.log(userInput + "user input");
 
     // swtich case for final function
     switch (action) {
