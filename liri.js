@@ -16,23 +16,26 @@ moment().format();
 const [_, __, action, parameter] = process.argv;
 
 ///switch cases
-switch (action) {
-  case "concert-this":
-    ifConcertThis(parameter);
-    break;
+function switchCase(action, parameter) {
+  switch (action) {
+    case "concert-this":
+      ifConcertThis(parameter);
+      break;
 
-  case "spotify-this-song":
-    ifSpotify(parameter);
-    break;
+    case "spotify-this-song":
+      ifSpotify(parameter);
+      break;
 
-  case "movie-this":
-    ifMovie(parameter);
-    break;
+    case "movie-this":
+      ifMovie(parameter);
+      break;
 
-  case "do-what-it-says":
-    ifDoWhatItSays();
-    break;
+    case "do-what-it-says":
+      ifDoWhatItSays();
+      break;
+  }
 }
+switchCase(action, parameter);
 
 // =================================
 // concert-this functionality
@@ -40,6 +43,7 @@ function ifConcertThis(parameter) {
   try {
     if (parameter.split(" ")[1]) {
       concert = parameter.split(" ").join("");
+      console.log(concert);
       bandInTownAPI(concert);
     } else {
       bandInTownAPI(parameter);
@@ -66,6 +70,18 @@ function bandInTownAPI(parameter) {
             `\nCity: ${res.data[i].venue.city}` +
             `\nCountry: ${res.data[i].venue.country}\n`
         );
+      }
+    })
+    .catch(function(error) {
+      if (error.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        console.log("---------------Data---------------");
+        console.log(error.response.data);
+        console.log("---------------Status---------------");
+        console.log(error.response.status);
+        console.log("---------------Status---------------");
+        console.log(error.response.headers);
       }
     });
 }
@@ -144,32 +160,13 @@ function OMDBAPI(movie) {
 
 // =================================
 function ifDoWhatItSays() {
-  const readFile = readFileSync("random.txt", (err, data) => {
-    let txtData;
-    let action;
-    let userInput;
-    txtData = data.toString().split(", ");
-    action = txtData[0];
-    console.log(action + " action");
-    userInput = txtData[1];
-    console.log(userInput + " user input");
-    // switch case for final function
+  const readFile = readFileSync("random.txt")
+    .toString()
+    .split(",");
+  let action = readFile[0].trim();
+  let parameter = readFile[1].trim();
+  console.log(action);
+  console.log(parameter);
 
-    switch (action) {
-      case "concert-this":
-        ifConcertThis(userInput);
-        break;
-
-      case "spotify-this-song":
-        ifSpotify(userInput);
-        break;
-
-      case "movie-this":
-        ifMovie(userInput);
-        break;
-    }
-    if (err) {
-      return console.log(err);
-    }
-  });
+  switchCase(action, parameter);
 }
