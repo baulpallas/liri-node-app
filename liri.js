@@ -3,7 +3,7 @@ const dotEnv = require("dotenv").config();
 const axios = require("axios");
 const keys = require("./keys");
 const moment = require("moment");
-const fs = require("fs");
+const { readFileSync } = require("fs");
 const Spotify = require(`node-spotify-api`);
 let spotify = new Spotify({
   id: process.env.SPOTIFY_ID,
@@ -94,14 +94,6 @@ function spotifyAPI(song) {
     .catch(function(err) {
       console.log(err);
     });
-
-  // axios
-  //   .get(
-  //     `https://accounts.spotify.com/authorize?client_id=${process.env.SPOTIFY_ID}&response_type=code&redirect_uri=https%3A%2F%2Fexample.com%2Fcallback&scope=user-read-private%20user-read-email&state=34fFs29kd0`
-  //   )
-  //   .then(function(res) {
-  //     console.log(res.data);
-  //   });
 }
 
 // =================================
@@ -152,20 +144,17 @@ function OMDBAPI(movie) {
 
 // =================================
 function ifDoWhatItSays() {
-  fs.readFile("random.txt", "utf8", function(err, data) {
+  const readFile = readFileSync("random.txt", (err, data) => {
     let txtData;
     let action;
     let userInput;
-    if (err) {
-      return console.log(err);
-    }
-    txtData = data.split(", ");
+    txtData = data.toString().split(", ");
     action = txtData[0];
-    console.log(action + "action");
+    console.log(action + " action");
     userInput = txtData[1];
-    console.log(userInput + "user input");
+    console.log(userInput + " user input");
+    // switch case for final function
 
-    // swtich case for final function
     switch (action) {
       case "concert-this":
         ifConcertThis(userInput);
@@ -178,6 +167,9 @@ function ifDoWhatItSays() {
       case "movie-this":
         ifMovie(userInput);
         break;
+    }
+    if (err) {
+      return console.log(err);
     }
   });
 }
