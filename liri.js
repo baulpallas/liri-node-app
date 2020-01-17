@@ -15,6 +15,7 @@ moment().format();
 // initialize command line usage
 const [_, __, action, parameter] = process.argv;
 
+// ===================================================================================================================
 ///switch cases
 function switchCase(action, parameter) {
   switch (action) {
@@ -33,17 +34,17 @@ function switchCase(action, parameter) {
     case "do-what-it-says":
       ifDoWhatItSays();
       break;
+    default:
+      console.log("Command not found! Try again!");
   }
 }
 switchCase(action, parameter);
 
-// =================================
-// concert-this functionality
+// ===================================================================================================================
 function ifConcertThis(parameter) {
   try {
     if (parameter.split(" ")[1]) {
       concert = parameter.split(" ").join("");
-      console.log(concert);
       bandInTownAPI(concert);
     } else {
       bandInTownAPI(parameter);
@@ -52,7 +53,7 @@ function ifConcertThis(parameter) {
     console.log("Invalid entry!");
   }
 }
-// concert-this API Call
+
 function bandInTownAPI(parameter) {
   axios
     .get(
@@ -86,10 +87,9 @@ function bandInTownAPI(parameter) {
     });
 }
 
-// =================================
+// ===================================================================================================================
 function ifSpotify(parameter) {
   spotifyAPI(parameter);
-  console.log("hello from spotify!");
 }
 
 function spotifyAPI(song) {
@@ -112,13 +112,12 @@ function spotifyAPI(song) {
     });
 }
 
-// =================================
+// ===================================================================================================================
 function ifMovie(parameter) {
   let movie;
   try {
     if (parameter.split(" ")[1]) {
       movie = parameter.split(" ").join("+");
-      console.log(movie);
       OMDBAPI(movie);
     } else {
       OMDBAPI(parameter);
@@ -143,7 +142,6 @@ function OMDBAPI(movie) {
           `\nPlot: ${res.data.Plot}` +
           `\nActors: ${res.data.Actors}`
       );
-      // console.log(res.data);
     })
     .catch(function(error) {
       if (error.res) {
@@ -154,11 +152,10 @@ function OMDBAPI(movie) {
         console.log("---------------Status---------------");
         console.log(error.res.headers);
       }
-      console.log("hello from omdb!");
     });
 }
 
-// =================================
+// ===================================================================================================================
 function ifDoWhatItSays() {
   const readFile = readFileSync("random.txt")
     .toString()
@@ -167,6 +164,5 @@ function ifDoWhatItSays() {
   let parameter = readFile[1].trim();
   console.log(action);
   console.log(parameter);
-
   switchCase(action, parameter);
 }
